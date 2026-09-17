@@ -7,6 +7,7 @@
       name="description"
       content="DemoAI 为人工智能团队提供高质量、多模态、可追溯的数据服务。"
     />
+    <meta name="demoai-api-base" content="http://localhost:8080" />
     <title>DemoAI | Data for intelligence</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -106,7 +107,7 @@
         </div>
       </nav>
 
-      <button class="header-cta" type="button">开始合作</button>
+      <a class="header-cta" href="#playground">体验 Demo</a>
     </header>
 
     <main id="top">
@@ -126,11 +127,107 @@
             DemoAI 将领域专家、数据工程与智能工具连接起来，<br class="desktop-break" />
             为下一代模型提供可信、可扩展的数据基础设施。
           </p>
-          <button class="primary-cta" type="button">
+          <a class="primary-cta" href="#playground">
             探索 DemoAI <span aria-hidden="true">&#8594;</span>
-          </button>
+          </a>
         </div>
         <div class="hero-index" aria-hidden="true">01 / DATA</div>
+      </section>
+
+      <section class="playground" id="playground" aria-labelledby="playground-title">
+        <div class="playground-heading">
+          <div>
+            <p class="section-kicker">LIVE DATA PIPELINE</p>
+            <h2 id="playground-title">把一段声音，<br />变成可用的数据。</h2>
+          </div>
+          <div class="service-state" data-service-state>
+            <span aria-hidden="true"></span>
+            <strong>正在连接 ASR 服务</strong>
+          </div>
+        </div>
+
+        <div class="playground-shell">
+          <form class="asr-input" data-asr-form>
+            <div class="panel-index">01 / INPUT</div>
+            <label class="upload-zone" data-upload-zone>
+              <input
+                type="file"
+                name="file"
+                accept="video/*,audio/*,.mkv,.flac"
+                data-file-input
+                required
+              />
+              <span class="upload-symbol" aria-hidden="true">&#8593;</span>
+              <strong>选择视频或音频</strong>
+              <small>也可以把文件拖到这里，最大 500 MB</small>
+            </label>
+
+            <div class="selected-file" data-selected-file hidden>
+              <div>
+                <span>已选择</span>
+                <strong data-file-name></strong>
+              </div>
+              <button type="button" data-clear-file aria-label="移除文件">&times;</button>
+            </div>
+
+            <div class="operator-line">
+              <div>
+                <span>处理算子</span>
+                <strong>ASR 转写</strong>
+              </div>
+              <span class="operator-status">READY</span>
+            </div>
+
+            <button class="run-button" type="submit" data-run-button disabled>
+              开始转写 <span aria-hidden="true">&#8594;</span>
+            </button>
+            <p class="form-error" data-form-error role="alert" hidden></p>
+          </form>
+
+          <div class="asr-output" aria-live="polite">
+            <div class="panel-index">02 / PROCESS</div>
+            <div class="media-preview" data-media-preview>
+              <div class="waveform" aria-hidden="true">
+                <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+              </div>
+              <p>上传文件后，这里会显示处理状态和转写结果。</p>
+            </div>
+
+            <div class="job-progress" data-job-progress hidden>
+              <div class="progress-heading">
+                <div>
+                  <span data-job-stage>准备任务</span>
+                  <strong data-job-progress-value>0%</strong>
+                </div>
+                <small data-job-id></small>
+              </div>
+              <div class="progress-track" aria-hidden="true">
+                <i data-progress-bar></i>
+              </div>
+              <ol class="progress-steps">
+                <li data-step="upload">上传文件</li>
+                <li data-step="queued">进入队列</li>
+                <li data-step="transcribing">ASR 转写</li>
+                <li data-step="completed">生成结果</li>
+              </ol>
+            </div>
+
+            <div class="transcript-result" data-transcript-result hidden>
+              <div class="result-meta">
+                <div><span>语言</span><strong data-result-language>--</strong></div>
+                <div><span>时长</span><strong data-result-duration>--</strong></div>
+                <div><span>片段</span><strong data-result-segments>--</strong></div>
+              </div>
+              <div class="transcript-copy">
+                <span>TRANSCRIPT</span>
+                <p data-result-text></p>
+              </div>
+              <a class="download-result" href="#" data-download-result download>
+                下载完整 JSON <span aria-hidden="true">&#8595;</span>
+              </a>
+            </div>
+          </div>
+        </div>
       </section>
 
       <section class="metrics" aria-label="DemoAI 数据能力">
