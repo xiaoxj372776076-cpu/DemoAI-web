@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="DemoAI 为人工智能团队提供高质量、多模态、可追溯的数据服务。"
+    />
+    <title>DemoAI | Data for intelligence</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="announcement">
+      <span class="announcement-dot" aria-hidden="true"></span>
+      DemoAI 数据引擎现已开放企业内测
+      <span class="announcement-arrow" aria-hidden="true">&#8599;</span>
+    </div>
+
+    <header class="site-header" data-header>
+      <a class="brand" href="#top" aria-label="DemoAI 首页">
+        <img src="assets/demoai-logo.jpeg" alt="DemoAI Logo" />
+        <span>DemoAI</span>
+      </a>
+
+      <button
+        class="menu-toggle"
+        type="button"
+        aria-label="打开导航菜单"
+        aria-expanded="false"
+        aria-controls="site-nav"
+        data-menu-toggle
+      >
+        <span></span>
+        <span></span>
+      </button>
+
+      <nav class="site-nav" id="site-nav" aria-label="主导航" data-nav>
+        <div class="nav-group" data-dropdown>
+          <button class="nav-trigger" type="button" aria-expanded="false">
+            产品 <span aria-hidden="true">&#8964;</span>
+          </button>
+          <div class="dropdown" role="menu">
+            <p class="dropdown-label">PRODUCTS</p>
+            <button type="button" disabled role="menuitem">
+              <strong>数据引擎</strong>
+              <span>采集、治理与交付全链路</span>
+            </button>
+            <button type="button" disabled role="menuitem">
+              <strong>模型评测</strong>
+              <span>从能力到安全的系统评估</span>
+            </button>
+            <button type="button" disabled role="menuitem">
+              <strong>Agent 工场</strong>
+              <span>面向复杂任务的环境构建</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="nav-group" data-dropdown>
+          <button class="nav-trigger" type="button" aria-expanded="false">
+            解决方案 <span aria-hidden="true">&#8964;</span>
+          </button>
+          <div class="dropdown dropdown-wide" role="menu">
+            <p class="dropdown-label">SOLUTIONS</p>
+            <button type="button" disabled role="menuitem">
+              <strong>大模型训练</strong>
+              <span>高质量预训练与后训练数据</span>
+            </button>
+            <button type="button" disabled role="menuitem">
+              <strong>多模态理解</strong>
+              <span>图像、视频与空间智能数据</span>
+            </button>
+            <button type="button" disabled role="menuitem">
+              <strong>企业智能</strong>
+              <span>私域知识与业务 Agent 数据</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="nav-group" data-dropdown>
+          <button class="nav-trigger" type="button" aria-expanded="false">
+            研究 <span aria-hidden="true">&#8964;</span>
+          </button>
+          <div class="dropdown" role="menu">
+            <p class="dropdown-label">RESEARCH</p>
+            <button type="button" disabled role="menuitem">
+              <strong>论文主页</strong>
+              <span>即将开放</span>
+            </button>
+            <button type="button" disabled role="menuitem">
+              <strong>技术报告</strong>
+              <span>数据工程实践与洞察</span>
+            </button>
+            <button type="button" disabled role="menuitem">
+              <strong>评测基准</strong>
+              <span>面向真实场景的开放测评</span>
+            </button>
+          </div>
+        </div>
+      </nav>
+
+      <button class="header-cta" type="button">开始合作</button>
+    </header>
+
+    <main id="top">
+      <section class="hero" aria-labelledby="hero-title">
+        <div class="hero-art" aria-hidden="true">
+          <div class="data-orbit orbit-one"></div>
+          <div class="data-orbit orbit-two"></div>
+          <div class="data-point point-one"></div>
+          <div class="data-point point-two"></div>
+          <div class="data-point point-three"></div>
+        </div>
+        <div class="hero-logo" aria-hidden="true"></div>
+        <div class="hero-content">
+          <p class="eyebrow">DATA FOR INTELLIGENCE</p>
+          <h1 id="hero-title">让高质量数据，<br />成为智能的起点。</h1>
+          <p class="hero-copy">
+            DemoAI 将领域专家、数据工程与智能工具连接起来，<br class="desktop-break" />
+            为下一代模型提供可信、可扩展的数据基础设施。
+          </p>
+          <button class="primary-cta" type="button">
+            探索 DemoAI <span aria-hidden="true">&#8594;</span>
+          </button>
+        </div>
+        <div class="hero-index" aria-hidden="true">01 / DATA</div>
+      </section>
+
+      <section class="metrics" aria-label="DemoAI 数据能力">
+        <p class="section-kicker">THE DATA ADVANTAGE</p>
+        <div class="metric-grid">
+          <article>
+            <strong>48h</strong>
+            <span>首批数据快速交付</span>
+          </article>
+          <article>
+            <strong>120+</strong>
+            <span>覆盖专业数据领域</span>
+          </article>
+          <article>
+            <strong>99.2%</strong>
+            <span>多层质检平均准确率</span>
+          </article>
+          <article>
+            <strong>24/7</strong>
+            <span>安全的数据生产管线</span>
+          </article>
+        </div>
+      </section>
+
+      <section class="capabilities" aria-labelledby="capabilities-title">
+        <div class="section-heading">
+          <p class="section-kicker">BUILT FOR FRONTIER AI</p>
+          <h2 id="capabilities-title">从原始世界到模型能力</h2>
+          <p>一套数据系统，覆盖发现、生产、评估和持续迭代。</p>
+        </div>
+        <div class="capability-grid">
+          <article class="capability-card card-dark">
+            <div class="card-number">01</div>
+            <div class="signal-bars" aria-hidden="true">
+              <i></i><i></i><i></i><i></i><i></i>
+            </div>
+            <div>
+              <p>DATA ENGINE</p>
+              <h3>训练数据</h3>
+              <span>高质量 SFT、RLHF 与多模态数据生产。</span>
+            </div>
+          </article>
+          <article class="capability-card card-mint">
+            <div class="card-number">02</div>
+            <div class="matrix" aria-hidden="true">
+              <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+            </div>
+            <div>
+              <p>EXPERT NETWORK</p>
+              <h3>领域专家</h3>
+              <span>让懂业务的人，直接定义模型需要学会什么。</span>
+            </div>
+          </article>
+          <article class="capability-card card-coral">
+            <div class="card-number">03</div>
+            <div class="radar" aria-hidden="true"><i></i></div>
+            <div>
+              <p>EVALUATION</p>
+              <h3>模型评测</h3>
+              <span>以真实任务发现能力边界与关键风险。</span>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="workflow" aria-labelledby="workflow-title">
+        <div class="workflow-copy">
+          <p class="section-kicker">HUMAN + MACHINE</p>
+          <h2 id="workflow-title">专家判断，<br />机器规模。</h2>
+          <p>
+            让自动化处理重复劳动，让领域专家专注于真正困难的判断。每个数据样本都有完整来源、质量轨迹与版本记录。
+          </p>
+        </div>
+        <ol class="workflow-list">
+          <li><span>01</span><strong>定义任务</strong><small>目标、标准与边界</small></li>
+          <li><span>02</span><strong>智能生产</strong><small>人机协同数据流水线</small></li>
+          <li><span>03</span><strong>多层质检</strong><small>自动规则与专家复核</small></li>
+          <li><span>04</span><strong>闭环优化</strong><small>用模型表现驱动迭代</small></li>
+        </ol>
+      </section>
+
+      <section class="cta-band">
+        <p class="section-kicker">START WITH BETTER DATA</p>
+        <h2>下一次模型跃迁，<br />从 DemoAI 开始。</h2>
+        <button class="primary-cta light" type="button">
+          联系我们 <span aria-hidden="true">&#8594;</span>
+        </button>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="footer-brand">
+        <img src="assets/demoai-logo.jpeg" alt="" />
+        <strong>DemoAI</strong>
+      </div>
+      <p>Data infrastructure for the next generation of intelligence.</p>
+      <div class="footer-meta">
+        <span>&copy; 2026 DemoAI</span>
+        <span>BEIJING &middot; GLOBAL</span>
+      </div>
+    </footer>
+
+    <script src="script.js"></script>
+  </body>
+</html>
