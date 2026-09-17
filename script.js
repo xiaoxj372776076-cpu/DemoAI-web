@@ -249,10 +249,13 @@ async function loadTranscript(job) {
   const artifactUrl = `${apiBase}${job.artifacts.transcript_url}`;
   const response = await fetch(artifactUrl, { cache: "no-store" });
   const transcript = await parseResponse(response);
-  resultLanguage.textContent = transcript.language || "未知";
+  const hasAudio = transcript.audio_present !== false;
+  resultLanguage.textContent = hasAudio ? transcript.language || "未知" : "--";
   resultDuration.textContent = formatDuration(transcript.duration_seconds);
   resultSegments.textContent = String(transcript.segments?.length || 0);
-  resultText.textContent = transcript.text || "没有检测到可转写的语音。";
+  resultText.textContent = hasAudio
+    ? transcript.text || "没有检测到可转写的语音。"
+    : "这个视频没有音轨，因此没有可转写的语音。";
   downloadResult.href = artifactUrl;
   transcriptResult.hidden = false;
 }
