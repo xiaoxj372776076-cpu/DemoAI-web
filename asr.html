@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="DemoAI ASR 算子，将视频或音频转写为结构化文本。" />
+    <meta name="demoai-api-base" content="http://localhost:8080" />
+    <title>ASR 语音转写 | DemoAI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="announcement">
+      <span class="announcement-dot" aria-hidden="true"></span>
+      DemoAI 数据引擎现已开放企业内测
+      <span class="announcement-arrow" aria-hidden="true">&#8599;</span>
+    </div>
+
+    <header class="site-header" data-header>
+      <a class="brand" href="index.html" aria-label="DemoAI 首页">
+        <img src="assets/demoai-logo.jpeg" alt="DemoAI Logo" />
+        <span>DemoAI</span>
+      </a>
+      <button
+        class="menu-toggle"
+        type="button"
+        aria-label="打开导航菜单"
+        aria-expanded="false"
+        aria-controls="site-nav"
+        data-menu-toggle
+      ><span></span><span></span></button>
+      <nav class="site-nav" id="site-nav" aria-label="主导航" data-nav>
+        <div class="nav-group" data-dropdown>
+          <button class="nav-trigger" type="button" aria-expanded="false">
+            产品 <span aria-hidden="true">&#8964;</span>
+          </button>
+          <div class="dropdown" role="menu" data-product-menu>
+            <p class="dropdown-label">PRODUCTS</p>
+            <div class="dropdown-list" data-product-list>
+              <span class="catalog-loading">正在加载产品...</span>
+            </div>
+          </div>
+        </div>
+        <div class="nav-group" data-dropdown>
+          <button class="nav-trigger" type="button" aria-expanded="false">
+            解决方案 <span aria-hidden="true">&#8964;</span>
+          </button>
+          <div class="dropdown dropdown-wide" role="menu">
+            <p class="dropdown-label">SOLUTIONS</p>
+            <button type="button" disabled role="menuitem"><strong>大模型训练</strong><span>高质量预训练与后训练数据</span></button>
+            <button type="button" disabled role="menuitem"><strong>多模态理解</strong><span>图像、视频与空间智能数据</span></button>
+            <button type="button" disabled role="menuitem"><strong>企业智能</strong><span>私域知识与业务 Agent 数据</span></button>
+          </div>
+        </div>
+        <div class="nav-group" data-dropdown>
+          <button class="nav-trigger" type="button" aria-expanded="false">
+            研究 <span aria-hidden="true">&#8964;</span>
+          </button>
+          <div class="dropdown" role="menu">
+            <p class="dropdown-label">RESEARCH</p>
+            <button type="button" disabled role="menuitem"><strong>论文主页</strong><span>即将开放</span></button>
+            <button type="button" disabled role="menuitem"><strong>技术报告</strong><span>数据工程实践与洞察</span></button>
+            <button type="button" disabled role="menuitem"><strong>评测基准</strong><span>面向真实场景的开放测评</span></button>
+          </div>
+        </div>
+      </nav>
+      <a class="header-cta" href="operators.html">算子广场</a>
+    </header>
+
+    <main>
+      <section class="operator-overview" aria-labelledby="operator-title">
+        <div class="operator-overview-copy">
+          <a class="back-link" href="operators.html">&#8592; 返回算子广场</a>
+          <p class="section-kicker" data-operator-category>OPERATOR DETAIL</p>
+          <h1 id="operator-title" data-operator-name>ASR 语音转写</h1>
+          <p data-operator-description>正在读取算子详情...</p>
+        </div>
+        <aside class="pricing-panel" aria-label="算子价格">
+          <span>处理单价</span>
+          <strong data-pricing-display>--</strong>
+          <p data-pricing-note>价格由服务端返回</p>
+        </aside>
+      </section>
+
+      <section class="playground operator-playground" id="playground" aria-labelledby="playground-title">
+        <div class="playground-heading">
+          <div>
+            <p class="section-kicker">LIVE DATA PIPELINE</p>
+            <h2 id="playground-title">上传媒体，<br />获得结构化转写。</h2>
+          </div>
+          <div class="service-state" data-service-state>
+            <span aria-hidden="true"></span><strong>正在连接 ASR 服务</strong>
+          </div>
+        </div>
+
+        <div class="playground-shell">
+          <form class="asr-input" data-asr-form data-operator-id="asr">
+            <div class="panel-index">01 / INPUT</div>
+            <label class="upload-zone" data-upload-zone>
+              <input type="file" name="file" data-file-input required />
+              <span class="upload-symbol" aria-hidden="true">&#8593;</span>
+              <strong>选择视频或音频</strong>
+              <small data-upload-limit>正在读取上传限制...</small>
+            </label>
+            <div class="selected-file" data-selected-file hidden>
+              <div><span>已选择</span><strong data-file-name></strong></div>
+              <button type="button" data-clear-file aria-label="移除文件">&times;</button>
+            </div>
+            <div class="operator-line">
+              <div><span>处理算子</span><strong data-form-operator-name>ASR 语音转写</strong></div>
+              <span class="operator-status" data-operator-status>LOADING</span>
+            </div>
+            <button class="run-button" type="submit" data-run-button disabled>
+              开始转写 <span aria-hidden="true">&#8594;</span>
+            </button>
+            <p class="form-error" data-form-error role="alert" hidden></p>
+          </form>
+
+          <div class="asr-output" aria-live="polite">
+            <div class="panel-index">02 / PROCESS</div>
+            <div class="media-preview" data-media-preview>
+              <div class="waveform" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+              <p>上传文件后，这里会显示处理状态和转写结果。</p>
+            </div>
+            <div class="job-progress" data-job-progress hidden>
+              <div class="progress-heading">
+                <div><span data-job-stage>准备任务</span><strong data-job-progress-value>0%</strong></div>
+                <small data-job-id></small>
+              </div>
+              <div class="progress-track" aria-hidden="true"><i data-progress-bar></i></div>
+              <ol class="progress-steps">
+                <li data-step="upload">上传文件</li><li data-step="queued">进入队列</li>
+                <li data-step="transcribing">ASR 转写</li><li data-step="completed">生成结果</li>
+              </ol>
+            </div>
+            <div class="transcript-result" data-transcript-result hidden>
+              <div class="result-meta">
+                <div><span>语言</span><strong data-result-language>--</strong></div>
+                <div><span>时长</span><strong data-result-duration>--</strong></div>
+                <div><span>片段</span><strong data-result-segments>--</strong></div>
+              </div>
+              <div class="transcript-copy"><span>TRANSCRIPT</span><p data-result-text></p></div>
+              <a class="download-result" href="#" data-download-result download>下载完整 JSON <span aria-hidden="true">&#8595;</span></a>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="footer-brand"><img src="assets/demoai-logo.jpeg" alt="" /><strong>DemoAI</strong></div>
+      <p>Data infrastructure for the next generation of intelligence.</p>
+      <div class="footer-meta"><span>&copy; 2026 DemoAI</span><span>BEIJING &middot; GLOBAL</span></div>
+    </footer>
+    <script src="script.js"></script>
+  </body>
+</html>
