@@ -1066,6 +1066,31 @@ button {
   line-height: 1.75;
 }
 
+.handpose-video {
+  margin-top: 20px;
+}
+
+.handpose-video > span {
+  color: #77827b;
+  font-size: 9px;
+  font-weight: 700;
+}
+
+.handpose-video video {
+  width: 100%;
+  display: block;
+  margin-top: 10px;
+  border: 1px solid #39413c;
+  border-radius: 4px;
+  background: #0d1210;
+}
+
+.result-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 22px;
+}
+
 .download-result {
   width: max-content;
   display: inline-flex;

@@ -16,6 +16,7 @@ hard-coded in these pages.
 
 - `index.html`: company homepage, backend-driven product navigation, ASR playground
 - `operators.html`: operator marketplace, populated by the operator catalog API
+- `handpose.html`: hand pose playground, renders the operator's skeleton video
 
 Run a local static server:
 
@@ -23,10 +24,10 @@ Run a local static server:
 python3 -m http.server 4173
 ```
 
-## ASR playground
+## Playgrounds
 
-The interactive ASR section expects `DemoAI-server` at
-`http://localhost:8080`. Start the Go backend first, then serve this repository:
+Both playgrounds expect `DemoAI-server` at `http://localhost:8080`. Start the Go
+backend first, then serve this repository:
 
 ```bash
 cd ../DemoAI-server
@@ -38,7 +39,14 @@ cd ../DemoAI-web
 python3 -m http.server 4173
 ```
 
-Open `http://localhost:4173`, choose a video or audio file, and start the ASR
-job. The page uploads the file, polls job progress, displays the transcript, and
-links to the complete JSON result. Change the `demoai-api-base` meta value in
-every HTML page when the backend is hosted elsewhere.
+Open `http://localhost:4173`, choose a video or audio file, and start the job.
+The page uploads the file, polls job progress, and renders the artifacts the
+backend reports:
+
+| Page | Operator | Artifact rendered |
+| --- | --- | --- |
+| `index.html#playground` | `asr` | transcript text, language, duration, JSON link |
+| `handpose.html` | `hand_pose` | rendered skeleton video, per-frame keypoint JSON |
+
+Change the `demoai-api-base` meta value in every HTML page when the backend is
+hosted elsewhere.

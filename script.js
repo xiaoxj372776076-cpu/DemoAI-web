@@ -458,6 +458,252 @@ function bindAsrPlayground() {
   window.setInterval(checkService, 10000);
 }
 
+/* ---------------------------------------------------------------------------
+ * 手部位姿估计 playground。
+ * 上传视频 → 后端 HaWoR 算子估计双手 21 关节 → 返回合成骨架视频。
+ * 视频与关键点都由后端产物接口提供，页面只负责播放和展示统计。
+ * ------------------------------------------------------------------------- */
+
+const handPoseStages = {
+  queued: "任务已进入队列",
+  estimating_hands: "正在进行手部位姿估计",
+  completed: "骨架视频已生成",
+  failed: "估计失败",
+};
+
+const handPoseStageOrder = ["upload", "queued", "estimating_hands", "completed"];
+
+function bindHandPosePlayground() {
+  const form = document.querySelector("[data-handpose-form]");
+  const input = form.querySelector("[data-file-input]");
+  const zone = form.querySelector("[data-upload-zone]");
+  const selected = form.querySelector("[data-selected-file]");
+  const nameLabel = form.querySelector("[data-file-name]");
+  const clearButton = form.querySelector("[data-clear-file]");
+  const runButton = form.querySelector("[data-run-button]");
+  const formError = form.querySelector("[data-form-error]");
+  const operatorStatus = form.querySelector("[data-operator-status]");
+
+  const serviceState = document.querySelector("[data-service-state]");
+  const mediaPreview = document.querySelector("[data-media-preview]");
+  const jobProgress = document.querySelector("[data-job-progress]");
+  const jobStage = document.querySelector("[data-job-stage]");
+  const jobProgressValue = document.querySelector("[data-job-progress-value]");
+  const jobIdLabel = document.querySelector("[data-job-id]");
+  const progressBar = document.querySelector("[data-progress-bar]");
+  const progressSteps = [...document.querySelectorAll("[data-step]")];
+
+  const result = document.querySelector("[data-handpose-result]");
+  const framesLabel = document.querySelector("[data-result-frames]");
+  const leftLabel = document.querySelector("[data-result-left]");
+  const rightLabel = document.querySelector("[data-result-right]");
+  const video = document.querySelector("[data-result-video]");
+  const downloadVideo = document.querySelector("[data-download-video]");
+  const downloadKeypoints = document.querySelector("[data-download-keypoints]");
+
+  let online = false;
+  let activeJob = null;
+  let previewUrl = null;
+
+  const setAvailability = () => {
+    runButton.disabled = !online || !input.files.length || Boolean(activeJob);
+  };
+
+  const setService = (isOnline) => {
+    online = isOnline;
+    serviceState.classList.toggle("is-online", isOnline);
+    serviceState.classList.toggle("is-offline", !isOnline);
+    serviceState.querySelector("strong").textContent = isOnline
+      ? "算子服务已连接"
+      : "算子服务未连接";
+    setAvailability();
+  };
+
+  const checkService = async () => {
+    try {
+      const response = await fetch(`${apiBase}/healthz`, { cache: "no-store" });
+      const payload = await response.json();
+      setService(response.ok && payload.ready === true);
+      if (operatorStatus) {
+        operatorStatus.textContent = payload.operators?.hand_pose ? "READY" : "OFFLINE";
+      }
+    } catch {
+      setService(false);
+      if (operatorStatus) operatorStatus.textContent = "OFFLINE";
+    }
+  };
+
+  const placeholder = () => {
+    mediaPreview.innerHTML = `
+      <div class="waveform" aria-hidden="true">
+        <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+      </div>
+      <p>上传视频后，这里会显示处理状态与合成后的骨架视频。</p>
+    `;
+  };
+
+  const select = (file) => {
+    if (!file) {
+      selected.hidden = true;
+      nameLabel.textContent = "";
+      placeholder();
+      setAvailability();
+      return;
+    }
+    formError.hidden = true;
+    if (file.size > 500 * 1024 * 1024) {
+      input.value = "";
+      selected.hidden = true;
+      nameLabel.textContent = "";
+      placeholder();
+      setAvailability();
+      formError.textContent = "文件不能超过 500 MB。";
+      formError.hidden = false;
+      return;
+    }
+    nameLabel.textContent = `${file.name} · ${formatBytes(file.size)}`;
+    selected.hidden = false;
+
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+    previewUrl = URL.createObjectURL(file);
+    const preview = document.createElement("video");
+    preview.className = "selected-media-preview";
+    preview.controls = true;
+    preview.preload = "metadata";
+    preview.src = previewUrl;
+    mediaPreview.replaceChildren(preview);
+    setAvailability();
+  };
+
+  const updateProgress = (job) => {
+    const progress = Math.max(0, Math.min(100, Number(job.progress) || 0));
+    jobProgress.hidden = false;
+    jobStage.textContent = handPoseStages[job.stage] || "正在处理";
+    jobProgressValue.textContent = `${progress}%`;
+    jobIdLabel.textContent = job.id || "";
+    progressBar.style.width = `${progress}%`;
+
+    const currentStage = job.status === "succeeded" ? "completed" : job.stage;
+    const currentIndex = handPoseStageOrder.indexOf(currentStage);
+    progressSteps.forEach((step, index) => {
+      step.classList.toggle("is-complete", index < currentIndex || job.status === "succeeded");
+      step.classList.toggle("is-active", index === currentIndex && job.status !== "succeeded");
+    });
+  };
+
+  const showArtifacts = async (job) => {
+    const videoUrl = `${apiBase}${job.artifacts.video_url}`;
+    const keypointsUrl = `${apiBase}${job.artifacts.keypoints_url}`;
+    video.src = videoUrl;
+    downloadVideo.href = videoUrl;
+    downloadKeypoints.href = keypointsUrl;
+
+    try {
+      const response = await fetch(keypointsUrl, { cache: "no-store" });
+      const keypoints = await parseResponse(response);
+      const metadata = keypoints.metadata || {};
+      const predicted = metadata.predicted_frame_counts || {};
+      framesLabel.textContent = String(metadata.frame_count ?? "--");
+      leftLabel.textContent = String(predicted.left ?? 0);
+      rightLabel.textContent = String(predicted.right ?? 0);
+    } catch {
+      framesLabel.textContent = "--";
+      leftLabel.textContent = "--";
+      rightLabel.textContent = "--";
+    }
+    result.hidden = false;
+  };
+
+  const poll = async (id) => {
+    const deadline = Date.now() + 45 * 60 * 1000;
+    while (Date.now() < deadline) {
+      await new Promise((resolve) => window.setTimeout(resolve, 2000));
+      const response = await fetch(`${apiBase}/api/v1/jobs/${id}`, { cache: "no-store" });
+      const job = await parseResponse(response);
+      updateProgress(job);
+      if (job.status === "succeeded") {
+        await showArtifacts(job);
+        return;
+      }
+      if (job.status === "failed") {
+        throw new Error(job.error?.message || "手部位姿估计失败。请查看服务端日志。");
+      }
+    }
+    throw new Error("任务等待超时，请稍后重新尝试。");
+  };
+
+  input.addEventListener("change", () => select(input.files[0]));
+
+  clearButton.addEventListener("click", () => {
+    input.value = "";
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+    previewUrl = null;
+    select(null);
+  });
+
+  ["dragenter", "dragover"].forEach((eventName) => {
+    zone.addEventListener(eventName, (event) => {
+      event.preventDefault();
+      zone.classList.add("is-dragging");
+    });
+  });
+
+  ["dragleave", "drop"].forEach((eventName) => {
+    zone.addEventListener(eventName, (event) => {
+      event.preventDefault();
+      zone.classList.remove("is-dragging");
+    });
+  });
+
+  zone.addEventListener("drop", (event) => {
+    const file = event.dataTransfer.files[0];
+    if (!file) return;
+    const transfer = new DataTransfer();
+    transfer.items.add(file);
+    input.files = transfer.files;
+    select(file);
+  });
+
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const file = input.files[0];
+    if (!file || !online || activeJob) return;
+
+    activeJob = "uploading";
+    formError.hidden = true;
+    result.hidden = true;
+    progressBar.style.background = "";
+    updateProgress({ id: "", stage: "upload", status: "processing", progress: 5 });
+    setAvailability();
+
+    const formData = new FormData();
+    formData.append("operator", "hand_pose");
+    formData.append("file", file, file.name);
+    try {
+      const response = await fetch(`${apiBase}/api/v1/jobs`, {
+        method: "POST",
+        body: formData,
+      });
+      const job = await parseResponse(response);
+      activeJob = job.id;
+      updateProgress(job);
+      await poll(job.id);
+    } catch (error) {
+      formError.textContent = error.message;
+      formError.hidden = false;
+      jobStage.textContent = "任务失败";
+      progressBar.style.background = "var(--coral)";
+    } finally {
+      activeJob = null;
+      setAvailability();
+    }
+  });
+
+  checkService();
+  window.setInterval(checkService, 10000);
+}
+
 loadProductCatalog();
 loadOperatorCatalog();
 if (asrForm) bindAsrPlayground();
+if (document.querySelector("[data-handpose-form]")) bindHandPosePlayground();
