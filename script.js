@@ -85,6 +85,132 @@ desktopMedia.addEventListener("change", () => {
 const apiBase = document
   .querySelector('meta[name="demoai-api-base"]')
   ?.content.replace(/\/$/, "") || "http://localhost:8080";
+
+/* ---------------------------------------------------------------------------
+ * 后端提供数据，前端只负责渲染。
+ * 导航产品目录与算子目录都由 DemoAI-server 返回，页面里不再硬编码任何条目。
+ * ------------------------------------------------------------------------- */
+
+function frontendURL(url) {
+  if (!url) return "#";
+  if (/^https?:\/\//i.test(url)) return url;
+  return url.replace(/^\/+/, "");
+}
+
+async function readJSON(path) {
+  const response = await fetch(`${apiBase}${path}`, { cache: "no-store" });
+  return parseResponse(response);
+}
+
+function catalogMessage(text, isError = false) {
+  const node = document.createElement("span");
+  node.className = isError ? "catalog-loading is-error" : "catalog-loading";
+  node.textContent = text;
+  return node;
+}
+
+function renderProductItem(item) {
+  const linkable = Boolean(item.enabled && item.url);
+  const entry = document.createElement(linkable ? "a" : "div");
+  entry.className = linkable ? "dropdown-item" : "dropdown-item is-disabled";
+  entry.setAttribute("role", "menuitem");
+  if (linkable) {
+    entry.href = frontendURL(item.url);
+  } else {
+    entry.setAttribute("aria-disabled", "true");
+  }
+
+  const name = document.createElement("strong");
+  name.textContent = item.name || "";
+  const description = document.createElement("span");
+  description.textContent = item.description || "";
+  entry.append(name, description);
+  return entry;
+}
+
+async function loadProductCatalog() {
+  const lists = [...document.querySelectorAll("[data-product-list]")];
+  if (!lists.length) return;
+  try {
+    const catalog = await readJSON("/api/v1/catalog/products");
+    const items = Array.isArray(catalog.items) ? catalog.items : [];
+    if (!items.length) {
+      lists.forEach((list) => list.replaceChildren(catalogMessage("暂无产品")));
+      return;
+    }
+    lists.forEach((list) => list.replaceChildren(...items.map(renderProductItem)));
+  } catch (error) {
+    lists.forEach((list) => list.replaceChildren(catalogMessage(error.message, true)));
+  }
+}
+
+function renderOperatorCard(operator) {
+  const linkable = Boolean(operator.available && operator.url);
+  const card = document.createElement(linkable ? "a" : "article");
+  card.className = "operator-card";
+  if (linkable) card.href = frontendURL(operator.url);
+
+  const top = document.createElement("div");
+  top.className = "operator-card-top";
+  const mark = document.createElement("span");
+  mark.className = "operator-mark";
+  mark.textContent = (operator.name || "?").trim().charAt(0).toUpperCase();
+  const status = document.createElement("span");
+  status.className = operator.available ? "availability is-available" : "availability";
+  status.textContent = operator.available ? "AVAILABLE" : "UNAVAILABLE";
+  top.append(mark, status);
+
+  const category = document.createElement("p");
+  category.className = "operator-category";
+  category.textContent = operator.category || "";
+  const title = document.createElement("h2");
+  title.textContent = operator.name || "";
+  const description = document.createElement("p");
+  description.className = "operator-description";
+  description.textContent = operator.description || "";
+
+  const footer = document.createElement("div");
+  footer.className = "operator-card-footer";
+  const price = document.createElement("strong");
+  price.textContent = operator.pricing?.display || "免费";
+  const action = document.createElement("span");
+  action.textContent = linkable ? "打开算子 →" : "暂不可用";
+  footer.append(price, action);
+
+  card.append(top, category, title, description, footer);
+  return card;
+}
+
+async function loadOperatorCatalog() {
+  const grid = document.querySelector("[data-operator-grid]");
+  const state = document.querySelector("[data-catalog-state]");
+  if (!grid) return;
+  try {
+    const catalog = await readJSON("/api/v1/operators");
+    const items = Array.isArray(catalog.items) ? catalog.items : [];
+    if (!items.length) {
+      const empty = document.createElement("div");
+      empty.className = "catalog-empty";
+      empty.textContent = "后端暂未发布任何算子。";
+      grid.replaceChildren(empty);
+      if (state) state.textContent = "暂无可用算子";
+      return;
+    }
+    grid.replaceChildren(...items.map(renderOperatorCard));
+    if (state) {
+      const available = items.filter((item) => item.available).length;
+      state.textContent = `${items.length} 个算子 · ${available} 个可运行`;
+      state.classList.add("is-online");
+    }
+  } catch (error) {
+    const failed = document.createElement("div");
+    failed.className = "catalog-empty is-error";
+    failed.textContent = error.message;
+    grid.replaceChildren(failed);
+    if (state) state.textContent = "算子目录连接失败";
+  }
+}
+
 const asrForm = document.querySelector("[data-asr-form]");
 const fileInput = document.querySelector("[data-file-input]");
 const uploadZone = document.querySelector("[data-upload-zone]");
@@ -260,72 +386,78 @@ async function loadTranscript(job) {
   transcriptResult.hidden = false;
 }
 
-fileInput.addEventListener("change", () => selectFile(fileInput.files[0]));
+function bindAsrPlayground() {
+  fileInput.addEventListener("change", () => selectFile(fileInput.files[0]));
 
-clearFile.addEventListener("click", () => {
-  fileInput.value = "";
-  if (previewUrl) URL.revokeObjectURL(previewUrl);
-  previewUrl = null;
-  selectFile(null);
-});
-
-["dragenter", "dragover"].forEach((eventName) => {
-  uploadZone.addEventListener(eventName, (event) => {
-    event.preventDefault();
-    uploadZone.classList.add("is-dragging");
+  clearFile.addEventListener("click", () => {
+    fileInput.value = "";
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+    previewUrl = null;
+    selectFile(null);
   });
-});
 
-["dragleave", "drop"].forEach((eventName) => {
-  uploadZone.addEventListener(eventName, (event) => {
-    event.preventDefault();
-    uploadZone.classList.remove("is-dragging");
-  });
-});
-
-uploadZone.addEventListener("drop", (event) => {
-  const file = event.dataTransfer.files[0];
-  if (!file) return;
-  const transfer = new DataTransfer();
-  transfer.items.add(file);
-  fileInput.files = transfer.files;
-  selectFile(file);
-});
-
-asrForm.addEventListener("submit", async (event) => {
-  event.preventDefault();
-  const file = fileInput.files[0];
-  if (!file || !serviceOnline || activeJob) return;
-
-  activeJob = "uploading";
-  formError.hidden = true;
-  transcriptResult.hidden = true;
-  progressBar.style.background = "";
-  updateJobUI({ id: "", stage: "upload", status: "processing", progress: 5 });
-  setRunAvailability();
-
-  const formData = new FormData();
-  formData.append("operator", "asr");
-  formData.append("file", file, file.name);
-  try {
-    const response = await fetch(`${apiBase}/api/v1/jobs`, {
-      method: "POST",
-      body: formData,
+  ["dragenter", "dragover"].forEach((eventName) => {
+    uploadZone.addEventListener(eventName, (event) => {
+      event.preventDefault();
+      uploadZone.classList.add("is-dragging");
     });
-    const job = await parseResponse(response);
-    activeJob = job.id;
-    updateJobUI(job);
-    await pollJob(job.id);
-  } catch (error) {
-    formError.textContent = error.message;
-    formError.hidden = false;
-    jobStage.textContent = "任务失败";
-    progressBar.style.background = "var(--coral)";
-  } finally {
-    activeJob = null;
-    setRunAvailability();
-  }
-});
+  });
 
-checkService();
-window.setInterval(checkService, 10000);
+  ["dragleave", "drop"].forEach((eventName) => {
+    uploadZone.addEventListener(eventName, (event) => {
+      event.preventDefault();
+      uploadZone.classList.remove("is-dragging");
+    });
+  });
+
+  uploadZone.addEventListener("drop", (event) => {
+    const file = event.dataTransfer.files[0];
+    if (!file) return;
+    const transfer = new DataTransfer();
+    transfer.items.add(file);
+    fileInput.files = transfer.files;
+    selectFile(file);
+  });
+
+  asrForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const file = fileInput.files[0];
+    if (!file || !serviceOnline || activeJob) return;
+
+    activeJob = "uploading";
+    formError.hidden = true;
+    transcriptResult.hidden = true;
+    progressBar.style.background = "";
+    updateJobUI({ id: "", stage: "upload", status: "processing", progress: 5 });
+    setRunAvailability();
+
+    const formData = new FormData();
+    formData.append("operator", "asr");
+    formData.append("file", file, file.name);
+    try {
+      const response = await fetch(`${apiBase}/api/v1/jobs`, {
+        method: "POST",
+        body: formData,
+      });
+      const job = await parseResponse(response);
+      activeJob = job.id;
+      updateJobUI(job);
+      await pollJob(job.id);
+    } catch (error) {
+      formError.textContent = error.message;
+      formError.hidden = false;
+      jobStage.textContent = "任务失败";
+      progressBar.style.background = "var(--coral)";
+    } finally {
+      activeJob = null;
+      setRunAvailability();
+    }
+  });
+
+  checkService();
+  window.setInterval(checkService, 10000);
+}
+
+loadProductCatalog();
+loadOperatorCatalog();
+if (asrForm) bindAsrPlayground();

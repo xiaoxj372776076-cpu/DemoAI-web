@@ -47,20 +47,12 @@
           <button class="nav-trigger" type="button" aria-expanded="false">
             产品 <span aria-hidden="true">&#8964;</span>
           </button>
-          <div class="dropdown" role="menu">
+          <!-- 产品目录由后端 GET /api/v1/catalog/products 提供，这里只负责渲染。 -->
+          <div class="dropdown" role="menu" data-product-menu>
             <p class="dropdown-label">PRODUCTS</p>
-            <button type="button" disabled role="menuitem">
-              <strong>数据引擎</strong>
-              <span>采集、治理与交付全链路</span>
-            </button>
-            <button type="button" disabled role="menuitem">
-              <strong>模型评测</strong>
-              <span>从能力到安全的系统评估</span>
-            </button>
-            <button type="button" disabled role="menuitem">
-              <strong>Agent 工场</strong>
-              <span>面向复杂任务的环境构建</span>
-            </button>
+            <div class="dropdown-list" data-product-list>
+              <span class="catalog-loading">正在加载产品...</span>
+            </div>
           </div>
         </div>
 
